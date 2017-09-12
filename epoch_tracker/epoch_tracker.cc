@@ -742,6 +742,11 @@ bool EpochTracker::ComputePolarity(int *polarity) {
   if (positive_rms_ > negative_rms_) {
     *polarity = 1;
   }
+  // BOF: always use positive polarity
+  *polarity = 1;
+  fprintf(stdout, "OVERRIDE: using positive polarity\n" ) ;
+  // EOF
+
   return true;
 }
 
@@ -765,13 +770,15 @@ bool EpochTracker::ComputeFeatures(void) {
   GetSymmetryStats(residual_, &positive_rms_, &negative_rms_, &mean);
   fprintf(stdout, "Residual symmetry: P:%f  N:%f  MEAN:%f\n",
 	  positive_rms_, negative_rms_, mean);
-  if (positive_rms_ > negative_rms_) {
+  if (false && positive_rms_ > negative_rms_) { // never flip (ljuvela)
     fprintf(stdout, "Inverting signal\n");
     for (size_t i = 0; i < residual_.size(); ++i) {
       residual_[i] = -residual_[i];
       signal_[i] = -signal_[i];
     }
   }
+  fprintf(stdout, "OVERRIDE: using positive polarity\n" ) ;
+
   NormalizeAmplitude(residual_, sample_rate_, &norm_residual_);
   GetResidualPulses();
   GetPulseCorrelations(correlation_dur_, correlation_thresh_);
